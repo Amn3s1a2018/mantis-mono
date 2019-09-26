@@ -19,8 +19,15 @@
   },
   "dependencies": {
     "@creativelittledots/reboot": "1.7.0",
+    "@polka/send-type": "^0.5.2",
+    "body-parser": "^1.19.0",
     "compression": "^1.7.1",
+    "cookie-parser": "^1.4.4",
+    "cors": "^2.8.5",
+    "dotenv": "^8.1.0",
+    "mysql": "^2.17.1",
     "polka": "^0.5.0",
+    "rollup-plugin-includepaths": "^0.2.3",
     "sirv": "^0.4.0",
     "svelte-transitions": "^1.2.0"
   },

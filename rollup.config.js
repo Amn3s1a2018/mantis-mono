@@ -9,12 +9,13 @@ import pkg from './package.json';
 import sveltePreprocess from 'svelte-preprocess';
 import autoprefixer from 'autoprefixer';
 import alias from 'rollup-plugin-alias';
-import path from 'path';
+import includePaths from 'rollup-plugin-includepaths';
 
 const mode = process.env.NODE_ENV;
 const dev = mode === 'development';
 const legacy = !!process.env.SAPPER_LEGACY_BUILD;
 
+const dedupe = importee => importee === 'svelte' || importee.startsWith('svelte/');
 const preprocess = sveltePreprocess({
     transformers: {
         scss: { sourceMap: false },
@@ -27,6 +28,7 @@ export default {
 		input: config.client.input(),
 		output: config.client.output(),
 		plugins: [
+			includePaths({ paths: ["src"], extensions: [".svelte"] }),
 			replace({
 				'process.browser': true,
 				'process.env.NODE_ENV': JSON.stringify(mode)
@@ -35,14 +37,13 @@ export default {
 				dev,
 				hydratable: true,
 				emitCss: true,
-                preprocess
+				preprocess
 			}),
-			resolve(),
+			resolve({
+				browser: true,
+				dedupe
+			}),
 			commonjs(),
-            alias({
-                resolve: ['.js', '.mjs', '.html', '.svelte'],
-                '~': path.join(__dirname, './src')
-            }),
 
 			legacy && babel({
 				extensions: ['.js', '.mjs', '.html', '.svelte'],
@@ -77,12 +78,11 @@ export default {
 				dev,
                 preprocess
 			}),
-			resolve(),
+			resolve({
+				dedupe
+			}),
 			commonjs(),
-            alias({
-                resolve: ['.js', '.mjs', '.html', '.svelte'],
-                '~': path.join(__dirname, './src')
-            }),
+			includePaths({ paths: ["src"], extensions: [".svelte"] }),
 		],
 		external: Object.keys(pkg.dependencies).concat(
 			require('module').builtinModules || Object.keys(process.binding('natives'))
@@ -98,11 +98,8 @@ export default {
 				'process.browser': true,
 				'process.env.NODE_ENV': JSON.stringify(mode)
 			}),
+			includePaths({ paths: ["src"], extensions: [".svelte"] }),
 			commonjs(),
-            alias({
-                resolve: ['.js', '.mjs', '.html', '.svelte'],
-                '~': path.join(__dirname, './src')
-            }),
 			!dev && terser({numWorkers: 1})
 		]
 	}
